@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output, SimpleChange} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, SimpleChange, SimpleChanges , OnChanges} from '@angular/core';
 import {IRatingUnit} from '../irating-unit';
 
 
@@ -8,7 +8,7 @@ import {IRatingUnit} from '../irating-unit';
   templateUrl: './rattting.component.html',
   styleUrls: ['./rattting.component.css']
 })
-export class RatttingComponent implements OnInit {
+export class RatttingComponent implements OnInit, OnChanges {
   @Input()
   max = 10;
   @Input()
@@ -19,19 +19,17 @@ export class RatttingComponent implements OnInit {
   rateChange = new EventEmitter<number>();
 
   rattingUnit: Array<IRatingUnit> = [];
-
-  ngOnChanges(change: SimpleChange) {
-    if ('max' in change) {
-      let max = change.max.currentValue;
+  ngOnChanges(changes: SimpleChanges) {
+    if ('max' in changes) {
+      let max = changes.max.currentValue;
       max = typeof max === 'undefined' ? 5 : max;
       this.max = max;
       this.calculate(max, this.RattingValue);
     }
-
   }
 
   calculate(max, ratingValue) {
-    this.ratingUnits = Array.from({length: max},
+    this.rattingUnit = Array.from({length: max},
       (_, index) => ({
         value: index + 1,
         active: index < ratingValue
@@ -46,12 +44,24 @@ export class RatttingComponent implements OnInit {
   ngOnInit() {
     this.calculate(this.max, this.RattingValue);
   }
-select(index){
-    this.rateChange = index + 1;
-    // @ts-ignore
-  this.rattingUnit.forEach((item, idx) => item.active = idx < this.rateChange);
-}
 
+  select(index) {
+    this.RattingValue= index + 1;
+
+    this.rattingUnit.forEach((item, idx) => item.active = idx < this.RattingValue);
+    this.rateChange.emit(this.RattingValue);
+
+  }
+
+  enter(index) {
+    this.rattingUnit.forEach((item, idx) => item.active = idx <= index);
+  }
+
+  reset() {
+    this.rattingUnit.forEach((item, idx) => item.active = idx < this.RattingValue);
+
+
+  }
 }
 
 
